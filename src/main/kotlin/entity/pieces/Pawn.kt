@@ -1,6 +1,5 @@
 package entity.pieces
 
-import entity.ChessBoard
 import entity.Square
 import entity.helper.Color
 
@@ -9,21 +8,24 @@ class Pawn(
 ) : Piece {
     override lateinit var square: Square
     override var inGame: Boolean = true
+    override var visibleSquares: ArrayList<Square> = arrayListOf()
     override var reachableSquares: ArrayList<Square> = arrayListOf()
 
-    constructor(color: Color, square: Square, inGame: Boolean) : this(color) {
+    constructor(color: Color, square: Square) : this(color) {
         this.square = square
-        this.inGame = inGame
     }
 
-    fun setSquare(value: Square) {
+    override fun setPosition(value: Square) {
         this.square = value
+        updateVisibleSquares()
+    }
 
+    private fun updateVisibleSquares() {
+        visibleSquares = arrayListOf()
         val board = square.getBoard()
-        val pairs = calculateReachableSquares(square.getFile(), square.getRank(), color, board)
-        reachableSquares = arrayListOf()
+        val pairs = calculateVisibleSquares(square.getFile(), square.getRank(), color)
         for (pair in pairs) {
-            reachableSquares.add(board.getSquare(pair.first, pair.second))
+            visibleSquares.add(board.getSquare(pair.first, pair.second))
         }
     }
 
@@ -36,42 +38,34 @@ class Pawn(
     }
 }
 
-fun calculateReachableSquares(file: Char, rank: Int, color: Color, board: ChessBoard): List<Pair<Char, Int>> {
-    val result = arrayListOf<Pair<Char, Int>>()
+private fun calculateVisibleSquares(file: Char, rank: Int, color: Color): List<Pair<Char, Int>> {
+    val visibleSquares = arrayListOf<Pair<Char, Int>>()
+
     if (color == Color.WHITE) {
-        result.add(Pair(file, rank + 1))
-        if (rank == 2) {
-            result.add(Pair(file, rank + 2))
+        visibleSquares.add(Pair(file, rank + 1))    // one square up
+        if (rank == 2) {    // two squares up
+            visibleSquares.add(Pair(file, rank + 2))
         }
-        if (file == 'a') {  // calculate possible diagonals
-            if (board.getSquare('b', rank + 1).getPiece() != null)
-                result.add(Pair('b', rank + 1))
-        } else if (file == 'h') {
-            if (board.getSquare('g', rank + 1).getPiece() != null)
-                result.add(Pair('g', rank + 1))
-        } else {
-            if (board.getSquare(file - 1, rank + 1).getPiece() != null)
-                result.add(Pair(file - 1, rank + 1))
-            if (board.getSquare(file + 1, rank + 1).getPiece() != null)
-                result.add(Pair(file + 1, rank + 1))
-        }
-    } else {
-        result.add(Pair(file, rank - 1))
-        if (rank == 7) {
-            result.add(Pair(file, rank - 2))
-        }
-        if (file == 'a') {
-            if (board.getSquare('b', rank - 1).getPiece() != null)
-                result.add(Pair('b', rank - 1))
-        } else if (file == 'h') {
-            if (board.getSquare('g', rank - 1).getPiece() != null)
-                result.add(Pair('g', rank - 1))
-        } else {
-            if (board.getSquare(file - 1, rank - 1).getPiece() != null)
-                result.add(Pair(file - 1, rank - 1))
-            if (board.getSquare(file + 1, rank - 1).getPiece() != null)
-                result.add(Pair(file + 1, rank - 1))
-        }
+        if (file - 1 in 'a'..'h')
+            visibleSquares.add(Pair(file - 1, rank + 1))
+        if (file + 1 in 'a'..'h')
+            visibleSquares.add(Pair(file + 1, rank + 1))
+        return visibleSquares
     }
-    return result
+
+    visibleSquares.add(Pair(file, rank - 1))    // one square down
+    if (rank == 7) {        // two squares down
+        visibleSquares.add(Pair(file, rank - 2))
+    }
+    if (file - 1 in 'a'..'h')
+        visibleSquares.add(Pair(file - 1, rank - 1))
+    if (file + 1 in 'a'..'h')
+        visibleSquares.add(Pair(file + 1, rank - 1))
+
+
+    return visibleSquares
+}
+
+fun main() {
+    println("${calculateVisibleSquares('a', 6, Color.BLACK)}")
 }

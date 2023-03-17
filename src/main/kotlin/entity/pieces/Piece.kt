@@ -5,7 +5,12 @@ import entity.helper.Color
 
 interface Piece {
     var inGame: Boolean
-    val square: Square
+    var square: Square
     val color: Color
-    val reachableSquares: ArrayList<Square>
+    var visibleSquares: ArrayList<Square>
+    var reachableSquares: ArrayList<Square>
+
+    fun setPosition(value: Square) {
+        this.square = value
+    }
 }

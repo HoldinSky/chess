@@ -66,9 +66,9 @@ class ChessBoard() {
         val color =
             if (type.isLowerCase()) Color.BLACK
             else Color.WHITE
-        val piece = createPiece(type, color)
 
         val fileIndex = file.uppercase().toInt() - 65
+        val piece = createPiece(type, color, board[rank - 1][fileIndex])
         if (piece != null)
             board[rank - 1][fileIndex].setPiece(piece)
     }

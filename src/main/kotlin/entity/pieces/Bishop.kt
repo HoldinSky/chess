@@ -3,9 +3,7 @@ package entity.pieces
 import entity.Square
 import entity.helper.Color
 
-class Knight(
-    override val color: Color
-) : Piece {
+class Bishop(override val color: Color) : Piece {
     override lateinit var square: Square
     override var inGame: Boolean = true
     override var visibleSquares: ArrayList<Square> = arrayListOf()
@@ -30,7 +28,7 @@ class Knight(
     }
 
     override fun toString(): String {
-        var string = "n"
+        var string = "b"
         if (color == Color.WHITE) {
             string = string.uppercase()
         }
@@ -41,32 +39,45 @@ class Knight(
 private fun calculateVisibleSquares(file: Char, rank: Int): List<Pair<Char, Int>> {
     val visibleSquares = mutableListOf<Pair<Char, Int>>()
 
-    val movements = arrayOf(
-        Pair(2, 1),
-        Pair(2, -1),
-        Pair(-2, 1),
-        Pair(-2, -1),
-        Pair(1, 2),
-        Pair(1, -2),
-        Pair(-1, 2),
-        Pair(-1, -2)
-    )
+    // beam to low left corner
+    var newFile = file - 1
+    var newRank = rank - 1
+    while (newFile in 'a'..'h' && newRank in 1..8) {
+        visibleSquares.add(Pair(newFile, newRank))
+        --newFile
+        --newRank
+    }
 
-    val fileIndex = file.uppercaseChar().code - 65
+    // to high left corner
+    newFile = file - 1
+    newRank = rank + 1
+    while (newFile in 'a'..'h' && newRank in 1..8) {
+        visibleSquares.add(Pair(newFile, newRank))
+        --newFile
+        ++newRank
+    }
 
-    for (movement in movements) {
-        val newFile = fileIndex + movement.first
-        val newRank = rank + movement.second
+    // to high right corner
+    newFile = file + 1
+    newRank = rank + 1
+    while (newFile in 'a'..'h' && newRank in 1..8) {
+        visibleSquares.add(Pair(newFile, newRank))
+        ++newFile
+        ++newRank
+    }
 
-        // Check if move is within the board boundaries
-        if (newFile in 0..7 && newRank in 1..8) {
-            visibleSquares.add(Pair((newFile + 65).toChar(), newRank))
-        }
+    // to low right corner
+    newFile = file + 1
+    newRank = rank - 1
+    while (newFile in 'a'..'h' && newRank in 1..8) {
+        visibleSquares.add(Pair(newFile, newRank))
+        ++newFile
+        --newRank
     }
 
     return visibleSquares
 }
 
 fun main() {
-    println("${calculateVisibleSquares('d', 5)}")
+    println("${calculateVisibleSquares('c', 2)}")
 }
