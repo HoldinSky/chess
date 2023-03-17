@@ -1,13 +1,23 @@
 package entity
 
+import entity.helper.Color
+import service.createPiece
+
 const val SIZE = 8
 
 class ChessBoard() {
-    private val board: Array<CharArray>
+    private val board: Array<Array<Square>>
 
     init {  // create playing board
-        val board = arrayListOf<CharArray>()
-        for (i in 1..SIZE) board.add(CharArray(8))
+        val board = arrayListOf<Array<Square>>()
+
+        for (i in 1..SIZE) {    // going through ranks from 8 to 1
+            val rank = arrayListOf<Square>()
+            for (j in 1..SIZE) {    // going through files
+                rank.add(Square(this, (j + 96).toChar(), i))
+            }
+            board.add(rank.toTypedArray())
+        }
 
         this.board = board.toTypedArray()
         clearBoard()
@@ -19,7 +29,7 @@ class ChessBoard() {
 
     private fun createBoardWithPosition(position: String) {
         var rank = 0
-        var file = 0
+        var file = 'a'
 
         for (ch in position) {
             if (ch == '/') continue
@@ -27,10 +37,10 @@ class ChessBoard() {
             // place a number of spaces between pieces in a rank
             if (ch.isDigit()) {
                 val newFile = file + ch.digitToInt()
-                file = if (newFile > 7) {
+                file = if (newFile >= 'h') {
                     fillWithBlank(rank, file, newFile)
                     ++rank
-                    0
+                    'a'
                 } else {
                     fillWithBlank(rank, file, newFile)
                     newFile
@@ -39,45 +49,40 @@ class ChessBoard() {
             }
 
             // place a piece on a square if such is mentioned in position
-            if (ch.isLowerCase()) {
-                when (ch) {
-                    'r' -> placePieceOnSquare('r', file, rank)
-                    'n' -> placePieceOnSquare('n', file, rank)
-                    'b' -> placePieceOnSquare('b', file, rank)
-                    'q' -> placePieceOnSquare('q', file, rank)
-                    'k' -> placePieceOnSquare('k', file, rank)
-                    'p' -> placePieceOnSquare('p', file, rank)
-                }
-            } else {
-                when (ch) {
-                    'R' -> placePieceOnSquare('R', file, rank)
-                    'N' -> placePieceOnSquare('N', file, rank)
-                    'B' -> placePieceOnSquare('B', file, rank)
-                    'Q' -> placePieceOnSquare('Q', file, rank)
-                    'K' -> placePieceOnSquare('K', file, rank)
-                    'P' -> placePieceOnSquare('P', file, rank)
-                }
-            }
-            if (++file > 7) {
+            placePieceOnSquare(ch, file, rank)
+            if (++file >= 'h') {
                 ++rank
-                file = 0
+                file = 'a'
             }
         }
     }
 
-    private fun placePieceOnSquare(piece: Char, file: Int, rank: Int) {
-        board[rank][file] = piece
+    fun getSquare(file: Char, rank: Int): Square {   // takes as input file and rank counting from 1
+        val fileIndex = file.uppercase().toInt() - 65
+        return this.board[rank - 1][fileIndex]
+    }
+
+    private fun placePieceOnSquare(type: Char, file: Char, rank: Int) {
+        val color =
+            if (type.isLowerCase()) Color.BLACK
+            else Color.WHITE
+        val piece = createPiece(type, color)
+
+        val fileIndex = file.uppercase().toInt() - 65
+        if (piece != null)
+            board[rank - 1][fileIndex].setPiece(piece)
     }
 
     private fun clearBoard() {
         for (i in 0 until SIZE) {
-            fillWithBlank(i, 0, SIZE)
+            fillWithBlank(i, 'a', 'h')
         }
     }
 
-    private fun fillWithBlank(rank: Int, startPos: Int, endPos: Int) {
-        for (i in startPos until endPos) {
-            board[rank][i] = ' '
+    private fun fillWithBlank(rank: Int, startPos: Char, endPos: Char) {
+        for (file in startPos until endPos) {
+            val index = file.uppercase().toInt() - 65
+            board[rank][index].removePiece()
         }
     }
 
