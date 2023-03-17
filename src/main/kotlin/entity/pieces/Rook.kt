@@ -3,11 +3,9 @@ package entity.pieces
 import entity.Square
 import entity.helper.Color
 
-class Knight(
-    override val color: Color
-) : Piece {
-    override lateinit var square: Square
+class Rook(override val color: Color) : Piece {
     override var inGame: Boolean = true
+    override lateinit var square: Square
     override var visibleSquares: ArrayList<Square> = arrayListOf()
     override var reachableSquares: ArrayList<Square> = arrayListOf()
 
@@ -22,7 +20,7 @@ class Knight(
 
     private fun updateVisibleSquares() {
         visibleSquares = arrayListOf()
-        val pairs = calculateKnightVisibleSquares(square.getFile(), square.getRank())
+        val pairs = calculateRookVisibleSquares(square.getFile(), square.getRank())
         val board = square.getBoard()
         for (pair in pairs) {
             visibleSquares.add(board.getSquare(pair.first, pair.second))
@@ -30,7 +28,7 @@ class Knight(
     }
 
     override fun toString(): String {
-        var string = "n"
+        var string = "r"
         if (color == Color.WHITE) {
             string = string.uppercase()
         }
@@ -38,35 +36,36 @@ class Knight(
     }
 }
 
-private fun calculateKnightVisibleSquares(file: Char, rank: Int): List<Pair<Char, Int>> {
+internal fun calculateRookVisibleSquares(file: Char, rank: Int): List<Pair<Char, Int>> {
     val visibleSquares = mutableListOf<Pair<Char, Int>>()
 
-    val movements = arrayOf(
-        Pair(2, 1),
-        Pair(2, -1),
-        Pair(-2, 1),
-        Pair(-2, -1),
-        Pair(1, 2),
-        Pair(1, -2),
-        Pair(-1, 2),
-        Pair(-1, -2)
-    )
+    var newFile = file - 1
+    while (newFile in 'a'..'h') {
+        visibleSquares.add(Pair(newFile, rank))
+        --newFile
+    }
 
-    val fileIndex = file.uppercaseChar().code - 65
+    newFile = file + 1
+    while (newFile in 'a'..'h') {
+        visibleSquares.add(Pair(newFile, rank))
+        ++newFile
+    }
 
-    for (movement in movements) {
-        val newFile = fileIndex + movement.first
-        val newRank = rank + movement.second
+    var newRank = rank - 1
+    while (newRank in 1..8) {
+        visibleSquares.add(Pair(file, newRank))
+        --newRank
+    }
 
-        // Check if move is within the board boundaries
-        if (newFile in 0..7 && newRank in 1..8) {
-            visibleSquares.add(Pair((newFile + 65).toChar(), newRank))
-        }
+    newRank = rank + 1
+    while (newRank in 1..8) {
+        visibleSquares.add(Pair(file, newRank))
+        ++newRank
     }
 
     return visibleSquares
 }
 
 fun main() {
-    println("${calculateKnightVisibleSquares('d', 5)}")
+    println("${calculateRookVisibleSquares('g', 4)}")
 }
