@@ -23,7 +23,7 @@ class Pawn(
     private fun updateVisibleSquares() {
         visibleSquares = arrayListOf()
         val board = square.getBoard()
-        val pairs = calculateVisibleSquares(square.getFile(), square.getRank(), color)
+        val pairs = calculatePawnVisibleSquares(square.getFile(), square.getRank(), color)
         for (pair in pairs) {
             visibleSquares.add(board.getSquare(pair.first, pair.second))
         }
@@ -38,7 +38,7 @@ class Pawn(
     }
 }
 
-private fun calculateVisibleSquares(file: Char, rank: Int, color: Color): List<Pair<Char, Int>> {
+private fun calculatePawnVisibleSquares(file: Char, rank: Int, color: Color): List<Pair<Char, Int>> {
     val visibleSquares = arrayListOf<Pair<Char, Int>>()
 
     if (color == Color.WHITE) {
@@ -67,5 +67,5 @@ private fun calculateVisibleSquares(file: Char, rank: Int, color: Color): List<P
 }
 
 fun main() {
-    println("${calculateVisibleSquares('a', 6, Color.BLACK)}")
+    println("${calculatePawnVisibleSquares('a', 6, Color.BLACK)}")
 }

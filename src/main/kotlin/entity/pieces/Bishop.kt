@@ -20,7 +20,7 @@ class Bishop(override val color: Color) : Piece {
 
     private fun updateVisibleSquares() {
         visibleSquares = arrayListOf()
-        val pairs = calculateVisibleSquares(square.getFile(), square.getRank())
+        val pairs = calculateBishopVisibleSquares(square.getFile(), square.getRank())
         val board = square.getBoard()
         for (pair in pairs) {
             visibleSquares.add(board.getSquare(pair.first, pair.second))
@@ -36,7 +36,7 @@ class Bishop(override val color: Color) : Piece {
     }
 }
 
-private fun calculateVisibleSquares(file: Char, rank: Int): List<Pair<Char, Int>> {
+internal fun calculateBishopVisibleSquares(file: Char, rank: Int): List<Pair<Char, Int>> {
     val visibleSquares = mutableListOf<Pair<Char, Int>>()
 
     // beam to low left corner
@@ -79,5 +79,5 @@ private fun calculateVisibleSquares(file: Char, rank: Int): List<Pair<Char, Int>
 }
 
 fun main() {
-    println("${calculateVisibleSquares('c', 2)}")
+    println("${calculateBishopVisibleSquares('c', 2)}")
 }

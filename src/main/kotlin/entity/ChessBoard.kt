@@ -36,7 +36,7 @@ class ChessBoard() {
 
             // place a number of spaces between pieces in a rank
             if (ch.isDigit()) {
-                val newFile = file + ch.digitToInt()
+                val newFile = file + ch.digitToInt() - 1
                 file = if (newFile >= 'h') {
                     fillWithBlank(rank, file, newFile)
                     ++rank
@@ -50,7 +50,7 @@ class ChessBoard() {
 
             // place a piece on a square if such is mentioned in position
             placePieceOnSquare(ch, file, rank)
-            if (++file >= 'h') {
+            if (++file > 'h') {
                 ++rank
                 file = 'a'
             }
@@ -58,7 +58,7 @@ class ChessBoard() {
     }
 
     fun getSquare(file: Char, rank: Int): Square {   // takes as input file and rank counting from 1
-        val fileIndex = file.uppercase().toInt() - 65
+        val fileIndex = file.uppercaseChar().code - 65
         return this.board[rank - 1][fileIndex]
     }
 
@@ -67,10 +67,10 @@ class ChessBoard() {
             if (type.isLowerCase()) Color.BLACK
             else Color.WHITE
 
-        val fileIndex = file.uppercase().toInt() - 65
-        val piece = createPiece(type, color, board[rank - 1][fileIndex])
+        val fileIndex = file.uppercaseChar().code - 65
+        val piece = createPiece(type, color, board[rank][fileIndex])
         if (piece != null)
-            board[rank - 1][fileIndex].setPiece(piece)
+            board[rank][fileIndex].setPiece(piece)
     }
 
     private fun clearBoard() {
@@ -81,7 +81,7 @@ class ChessBoard() {
 
     private fun fillWithBlank(rank: Int, startPos: Char, endPos: Char) {
         for (file in startPos until endPos) {
-            val index = file.uppercase().toInt() - 65
+            val index = file.uppercaseChar().code - 65
             board[rank][index].removePiece()
         }
     }
