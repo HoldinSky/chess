@@ -8,8 +8,7 @@ class Knight(
 ) : Piece {
     override lateinit var square: Square
     override var inGame: Boolean = true
-    override var visibleSquares: ArrayList<Square> = arrayListOf()
-    override var reachableSquares: ArrayList<Square> = arrayListOf()
+    override var possibleMoves: ArrayList<Square> = arrayListOf()
 
     constructor(color: Color, square: Square) : this(color) {
         this.square = square
@@ -17,15 +16,15 @@ class Knight(
 
     override fun setPosition(value: Square) {
         this.square = value
-        updateVisibleSquares()
+        updatePossibleMoves()
     }
 
-    private fun updateVisibleSquares() {
-        visibleSquares = arrayListOf()
-        val pairs = calculateKnightVisibleSquares(square.getFile(), square.getRank())
+    private fun updatePossibleMoves() {
+        possibleMoves = arrayListOf()
+        val pairs = calculateKnightPossibleMoves(square.getFile(), square.getRank())
         val board = square.getBoard()
         for (pair in pairs) {
-            visibleSquares.add(board.getSquare(pair.first, pair.second))
+            possibleMoves.add(board.getSquare(pair.first, pair.second))
         }
     }
 
@@ -38,7 +37,7 @@ class Knight(
     }
 }
 
-private fun calculateKnightVisibleSquares(file: Char, rank: Int): List<Pair<Char, Int>> {
+private fun calculateKnightPossibleMoves(file: Char, rank: Int): List<Pair<Char, Int>> {
     val visibleSquares = mutableListOf<Pair<Char, Int>>()
 
     val movements = arrayOf(
@@ -68,5 +67,5 @@ private fun calculateKnightVisibleSquares(file: Char, rank: Int): List<Pair<Char
 }
 
 fun main() {
-    println("${calculateKnightVisibleSquares('d', 5)}")
+    println("${calculateKnightPossibleMoves('d', 5)}")
 }

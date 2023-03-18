@@ -7,10 +7,13 @@ interface Piece {
     var inGame: Boolean
     var square: Square
     val color: Color
-    var visibleSquares: ArrayList<Square>
-    var reachableSquares: ArrayList<Square>
+    var possibleMoves: ArrayList<Square>
 
     fun setPosition(value: Square) {
         this.square = value
+    }
+
+    fun getPosition(): Square {
+        return this.square
     }
 }

@@ -6,8 +6,7 @@ import entity.helper.Color
 class Rook(override val color: Color) : Piece {
     override var inGame: Boolean = true
     override lateinit var square: Square
-    override var visibleSquares: ArrayList<Square> = arrayListOf()
-    override var reachableSquares: ArrayList<Square> = arrayListOf()
+    override var possibleMoves: ArrayList<Square> = arrayListOf()
 
     constructor(color: Color, square: Square) : this(color) {
         this.square = square
@@ -15,15 +14,15 @@ class Rook(override val color: Color) : Piece {
 
     override fun setPosition(value: Square) {
         this.square = value
-        updateVisibleSquares()
+        updatePossibleMoves()
     }
 
-    private fun updateVisibleSquares() {
-        visibleSquares = arrayListOf()
-        val pairs = calculateRookVisibleSquares(square.getFile(), square.getRank())
+    private fun updatePossibleMoves() {
+        possibleMoves = arrayListOf()
+        val pairs = calculateRookPossibleMoves(square.getFile(), square.getRank())
         val board = square.getBoard()
         for (pair in pairs) {
-            visibleSquares.add(board.getSquare(pair.first, pair.second))
+            possibleMoves.add(board.getSquare(pair.first, pair.second))
         }
     }
 
@@ -36,7 +35,7 @@ class Rook(override val color: Color) : Piece {
     }
 }
 
-internal fun calculateRookVisibleSquares(file: Char, rank: Int): List<Pair<Char, Int>> {
+internal fun calculateRookPossibleMoves(file: Char, rank: Int): List<Pair<Char, Int>> {
     val visibleSquares = mutableListOf<Pair<Char, Int>>()
 
     var newFile = file - 1
@@ -67,5 +66,5 @@ internal fun calculateRookVisibleSquares(file: Char, rank: Int): List<Pair<Char,
 }
 
 fun main() {
-    println("${calculateRookVisibleSquares('g', 4)}")
+    println("${calculateRookPossibleMoves('g', 4)}")
 }

@@ -6,8 +6,7 @@ import entity.helper.Color
 class Queen(override val color: Color) : Piece {
     override var inGame: Boolean = true
     override lateinit var square: Square
-    override var visibleSquares: ArrayList<Square> = arrayListOf()
-    override var reachableSquares: ArrayList<Square> = arrayListOf()
+    override var possibleMoves: ArrayList<Square> = arrayListOf()
 
     constructor(color: Color, square: Square) : this(color) {
         this.square = square
@@ -15,15 +14,15 @@ class Queen(override val color: Color) : Piece {
 
     override fun setPosition(value: Square) {
         this.square = value
-        updateVisibleSquares()
+        updatePossibleMoves()
     }
 
-    private fun updateVisibleSquares() {
-        visibleSquares = arrayListOf()
-        val pairs = calculateQueenVisibleSquares(square.getFile(), square.getRank())
+    private fun updatePossibleMoves() {
+        possibleMoves = arrayListOf()
+        val pairs = calculateQueenPossibleMoves(square.getFile(), square.getRank())
         val board = square.getBoard()
         for (pair in pairs) {
-            visibleSquares.add(board.getSquare(pair.first, pair.second))
+            possibleMoves.add(board.getSquare(pair.first, pair.second))
         }
     }
 
@@ -36,15 +35,15 @@ class Queen(override val color: Color) : Piece {
     }
 }
 
-private fun calculateQueenVisibleSquares(file: Char, rank: Int): List<Pair<Char, Int>> {
+private fun calculateQueenPossibleMoves(file: Char, rank: Int): List<Pair<Char, Int>> {
     val visibleSquares = mutableListOf<Pair<Char, Int>>()
 
-    visibleSquares.addAll(calculateRookVisibleSquares(file, rank))
-    visibleSquares.addAll(calculateBishopVisibleSquares(file, rank))
+    visibleSquares.addAll(calculateRookPossibleMoves(file, rank))
+//    visibleSquares.addAll(calculateBishopPossibleMoves(file, rank))
 
     return visibleSquares
 }
 
 fun main() {
-    println("${calculateQueenVisibleSquares('g', 4)}")
+    println("${calculateQueenPossibleMoves('g', 4)}")
 }

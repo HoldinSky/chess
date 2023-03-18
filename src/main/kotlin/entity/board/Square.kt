@@ -37,6 +37,10 @@ class Square(
         this.piece = null
     }
 
+    fun isBlank(): Boolean {
+        return this.piece == null
+    }
+
     override fun toString(): String {
         if (piece == null) return " "
         return piece.toString()

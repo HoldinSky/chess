@@ -8,8 +8,7 @@ class Pawn(
 ) : Piece {
     override lateinit var square: Square
     override var inGame: Boolean = true
-    override var visibleSquares: ArrayList<Square> = arrayListOf()
-    override var reachableSquares: ArrayList<Square> = arrayListOf()
+    override var possibleMoves: ArrayList<Square> = arrayListOf()
 
     constructor(color: Color, square: Square) : this(color) {
         this.square = square
@@ -17,15 +16,15 @@ class Pawn(
 
     override fun setPosition(value: Square) {
         this.square = value
-        updateVisibleSquares()
+        updatePossibleMoves()
     }
 
-    private fun updateVisibleSquares() {
-        visibleSquares = arrayListOf()
+    private fun updatePossibleMoves() {
+        possibleMoves = arrayListOf()
         val board = square.getBoard()
-        val pairs = calculatePawnVisibleSquares(square.getFile(), square.getRank(), color)
+        val pairs = calculatePawnPossibleMoves(square.getFile(), square.getRank(), color)
         for (pair in pairs) {
-            visibleSquares.add(board.getSquare(pair.first, pair.second))
+            possibleMoves.add(board.getSquare(pair.first, pair.second))
         }
     }
 
@@ -38,7 +37,7 @@ class Pawn(
     }
 }
 
-private fun calculatePawnVisibleSquares(file: Char, rank: Int, color: Color): List<Pair<Char, Int>> {
+private fun calculatePawnPossibleMoves(file: Char, rank: Int, color: Color): List<Pair<Char, Int>> {
     val visibleSquares = arrayListOf<Pair<Char, Int>>()
 
     if (color == Color.WHITE) {
@@ -67,5 +66,5 @@ private fun calculatePawnVisibleSquares(file: Char, rank: Int, color: Color): Li
 }
 
 fun main() {
-    println("${calculatePawnVisibleSquares('a', 6, Color.BLACK)}")
+    println("${calculatePawnPossibleMoves('a', 6, Color.BLACK)}")
 }

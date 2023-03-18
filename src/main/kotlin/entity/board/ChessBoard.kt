@@ -17,7 +17,7 @@ class ChessBoard() {
         for (i in 1..SIZE) {    // going through ranks from 8 to 1
             val rank = arrayListOf<Square>()
             for (j in 1..SIZE) {    // going through files
-                rank.add(Square(this, (j + 96).toChar(), i))
+                rank.add(Square(this, (j + 96).toChar(), SIZE - i + 1))
             }
             board.add(rank.toTypedArray())
         }
@@ -30,6 +30,10 @@ class ChessBoard() {
 
     constructor(position: String) : this() {
         createBoardWithPosition(position)
+        for (piece in whitePieces)
+            piece.setPosition(piece.getPosition())
+        for (piece in blackPieces)
+            piece.setPosition(piece.getPosition())
     }
 
     private fun createBoardWithPosition(position: String) {
@@ -41,7 +45,7 @@ class ChessBoard() {
 
             // place a number of spaces between pieces in a rank
             if (ch.isDigit()) {
-                val newFile = file + ch.digitToInt() - 1
+                val newFile = file + ch.digitToInt()
                 file = if (newFile >= 'h') {
                     fillWithBlank(rank, file, newFile)
                     ++rank
@@ -70,7 +74,8 @@ class ChessBoard() {
 
     fun getSquare(file: Char, rank: Int): Square {   // takes as input file and rank counting from 1
         val fileIndex = file.uppercaseChar().code - 65
-        return this.board[rank - 1][fileIndex]
+        val arrayRank = SIZE - rank
+        return this.board[arrayRank][fileIndex]
     }
 
     private fun placePieceOnSquare(type: Char, file: Char, rank: Int): Piece? {
@@ -109,4 +114,5 @@ class ChessBoard() {
         println("    ----------------------")
         println("    a  b  c  d  e  f  g  h")
     }
+
 }
