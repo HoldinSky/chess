@@ -1,4 +1,4 @@
-package entity
+package entity.board
 
 import entity.pieces.Piece
 

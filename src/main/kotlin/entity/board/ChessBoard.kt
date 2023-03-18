@@ -1,12 +1,15 @@
-package entity
+package entity.board
 
 import entity.helper.Color
+import entity.pieces.Piece
 import service.createPiece
 
 const val SIZE = 8
 
 class ChessBoard() {
     private val board: Array<Array<Square>>
+    private val whitePieces: ArrayList<Piece>
+    private val blackPieces: ArrayList<Piece>
 
     init {  // create playing board
         val board = arrayListOf<Array<Square>>()
@@ -21,6 +24,8 @@ class ChessBoard() {
 
         this.board = board.toTypedArray()
         clearBoard()
+        whitePieces = arrayListOf()
+        blackPieces = arrayListOf()
     }
 
     constructor(position: String) : this() {
@@ -49,7 +54,13 @@ class ChessBoard() {
             }
 
             // place a piece on a square if such is mentioned in position
-            placePieceOnSquare(ch, file, rank)
+            val piece = placePieceOnSquare(ch, file, rank)
+            if (piece != null) {
+                if (piece.color == Color.WHITE)
+                    whitePieces.add(piece)
+                else
+                    blackPieces.add(piece)
+            }
             if (++file > 'h') {
                 ++rank
                 file = 'a'
@@ -62,7 +73,7 @@ class ChessBoard() {
         return this.board[rank - 1][fileIndex]
     }
 
-    private fun placePieceOnSquare(type: Char, file: Char, rank: Int) {
+    private fun placePieceOnSquare(type: Char, file: Char, rank: Int): Piece? {
         val color =
             if (type.isLowerCase()) Color.BLACK
             else Color.WHITE
@@ -71,6 +82,7 @@ class ChessBoard() {
         val piece = createPiece(type, color, board[rank][fileIndex])
         if (piece != null)
             board[rank][fileIndex].setPiece(piece)
+        return piece
     }
 
     private fun clearBoard() {

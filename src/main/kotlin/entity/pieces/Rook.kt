@@ -1,6 +1,6 @@
 package entity.pieces
 
-import entity.Square
+import entity.board.Square
 import entity.helper.Color
 
 class Rook(override val color: Color) : Piece {

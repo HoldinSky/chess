@@ -1,6 +1,6 @@
 package service
 
-import entity.Square
+import entity.board.Square
 import entity.helper.Color
 import entity.pieces.*
 
