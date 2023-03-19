@@ -3,11 +3,14 @@ package entity.pieces
 import entity.board.ChessBoard
 import entity.board.Square
 import entity.helper.Color
+import entity.helper.squaresToPairs
+import service.DEFAULT_POSITION
 
 class Bishop(override val color: Color) : Piece {
     override lateinit var square: Square
     override var inGame: Boolean = true
-    override var possibleMoves: ArrayList<Square> = arrayListOf()
+    override val possibleMoves: ArrayList<Square> = arrayListOf()
+    override val squaresUnderAttack: ArrayList<Square> = arrayListOf()
 
     constructor(color: Color, square: Square) : this(color) {
         this.square = square
@@ -15,16 +18,19 @@ class Bishop(override val color: Color) : Piece {
 
     override fun setPosition(value: Square) {
         this.square = value
-        updatePossibleMoves()
     }
 
-    private fun updatePossibleMoves() {
-        possibleMoves = arrayListOf()
-        val board = square.getBoard()
-        val pairs = calculateBishopPossibleMoves(square.getFile(), square.getRank(), color,  board)
-        for (pair in pairs) {
-            possibleMoves.add(board.getSquare(pair.first, pair.second))
-        }
+    override fun updateMoves() {
+        calculateBishopMoves(square.getFile(), square.getRank(), color, square.getBoard())
+    }
+
+    private fun calculateBishopMoves(file: Char, rank: Int, color: Color, board: ChessBoard) {
+
+        possibleMoves.clear()
+        squaresUnderAttack.clear()
+
+        calculateDiagonalMoves(file, rank, color, board, possibleMoves)
+        calculateDiagonalAttacks(file, rank, board, squaresUnderAttack)
     }
 
     override fun toString(): String {
@@ -36,27 +42,9 @@ class Bishop(override val color: Color) : Piece {
     }
 }
 
-internal fun calculateBishopPossibleMoves(file: Char, rank: Int, color: Color,  board: ChessBoard): List<Pair<Char, Int>> {
-    val possibleMoves = mutableListOf<Pair<Char, Int>>()
-    val oppositeColor = if (color == Color.WHITE)
-        Color.BLACK
-    else
-        Color.WHITE
-
-    // beam to low left corner
-    possibleMoves.addAll(checkDirection(file, rank, -1, -1, color, oppositeColor, board))
-    // to high left corner
-    possibleMoves.addAll(checkDirection(file, rank, -1, 1, color, oppositeColor, board))
-    // to high right corner
-    possibleMoves.addAll(checkDirection(file, rank, 1, 1, color, oppositeColor, board))
-    // to low right corner
-    possibleMoves.addAll(checkDirection(file, rank, 1, -1, color, oppositeColor, board))
-
-    return possibleMoves
-}
-
 fun main() {
-    val chessBoard = ChessBoard("rnbqkbnr/pppppppp/8/3n4/8/8/PPPPPPPP/RNBQKBNR")
-    println("${calculateBishopPossibleMoves('c', 4, Color.WHITE, chessBoard)}")
+    val chessBoard = ChessBoard(DEFAULT_POSITION)
+    println("Possible moves of bishop: ${squaresToPairs(chessBoard.getSquare('c', 1).getPiece()!!.possibleMoves)}")
+    println("Squares under attack of bishop: ${squaresToPairs(chessBoard.getSquare('c', 1).getPiece()!!.squaresUnderAttack)}")
     chessBoard.printBoard()
 }

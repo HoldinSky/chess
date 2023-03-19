@@ -19,7 +19,14 @@ fun createPiece(type: Char, color: Color): Piece? {
 }
 
 fun createPiece(type: Char, color: Color, square: Square): Piece? {
-    val piece = createPiece(type, color)
-    piece?.setPosition(square)
+    val piece: Piece? = when (type.lowercaseChar()) {
+        'p' -> Pawn(color, square)
+        'n' -> Knight(color, square)
+        'b' -> Bishop(color, square)
+        'r' -> Rook(color, square)
+        'q' -> Queen(color, square)
+        'k' -> King(color, square)
+        else -> null
+    }
     return piece
 }

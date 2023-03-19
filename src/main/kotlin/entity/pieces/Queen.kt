@@ -3,11 +3,14 @@ package entity.pieces
 import entity.board.ChessBoard
 import entity.board.Square
 import entity.helper.Color
+import entity.helper.squaresToPairs
+import service.DEFAULT_POSITION
 
 class Queen(override val color: Color) : Piece {
     override var inGame: Boolean = true
     override lateinit var square: Square
-    override var possibleMoves: ArrayList<Square> = arrayListOf()
+    override val possibleMoves: ArrayList<Square> = arrayListOf()
+    override val squaresUnderAttack: ArrayList<Square> = arrayListOf()
 
     constructor(color: Color, square: Square) : this(color) {
         this.square = square
@@ -15,16 +18,21 @@ class Queen(override val color: Color) : Piece {
 
     override fun setPosition(value: Square) {
         this.square = value
-        updatePossibleMoves()
     }
 
-    private fun updatePossibleMoves() {
-        possibleMoves = arrayListOf()
-        val board = square.getBoard()
-        val pairs = calculateQueenPossibleMoves(square.getFile(), square.getRank(), color, board)
-        for (pair in pairs) {
-            possibleMoves.add(board.getSquare(pair.first, pair.second))
-        }
+    override fun updateMoves() {
+        calculateQueenPossibleMoves(square.getFile(), square.getRank(), color, square.getBoard())
+    }
+
+    private fun calculateQueenPossibleMoves(file: Char, rank: Int, color: Color, board: ChessBoard) {
+        possibleMoves.clear()
+        squaresUnderAttack.clear()
+
+        calculateDiagonalMoves(file, rank, color, board, possibleMoves)
+        calculateStraightMoves(file, rank, color, board, possibleMoves)
+
+        calculateDiagonalAttacks(file, rank, board, squaresUnderAttack)
+        calculateStraightAttacks(file, rank, board, squaresUnderAttack)
     }
 
     override fun toString(): String {
@@ -36,17 +44,9 @@ class Queen(override val color: Color) : Piece {
     }
 }
 
-private fun calculateQueenPossibleMoves(file: Char, rank: Int, color: Color, board: ChessBoard): List<Pair<Char, Int>> {
-    val visibleSquares = mutableListOf<Pair<Char, Int>>()
-
-    visibleSquares.addAll(calculateRookPossibleMoves(file, rank, color, board))
-    visibleSquares.addAll(calculateBishopPossibleMoves(file, rank, color, board))
-
-    return visibleSquares
-}
-
 fun main() {
-    val chessBoard = ChessBoard("rnbqkbnr/pppppppp/8/8/2Qb4/8/PPPPPPPP/RNBQKBNR")
-    println("${calculateQueenPossibleMoves('d', 5, Color.WHITE, chessBoard)}")
+    val chessBoard = ChessBoard(DEFAULT_POSITION)
+    println("Possible moves of queen: ${squaresToPairs(chessBoard.getSquare('d', 1).getPiece()!!.possibleMoves)}")
+    println("Squares under attack of queen: ${squaresToPairs(chessBoard.getSquare('d', 1).getPiece()!!.squaresUnderAttack)}")
     chessBoard.printBoard()
 }

@@ -2,6 +2,7 @@ package entity.board
 
 import entity.helper.Color
 import entity.pieces.Piece
+import service.DEFAULT_POSITION
 import service.createPiece
 
 const val SIZE = 8
@@ -10,6 +11,8 @@ class ChessBoard() {
     private val board: Array<Array<Square>>
     private val whitePieces: ArrayList<Piece>
     private val blackPieces: ArrayList<Piece>
+    private val squaresOnWhiteAttack: ArrayList<Square>
+    private val squaresOnBlackAttack: ArrayList<Square>
 
     init {  // create playing board
         val board = arrayListOf<Array<Square>>()
@@ -26,14 +29,23 @@ class ChessBoard() {
         clearBoard()
         whitePieces = arrayListOf()
         blackPieces = arrayListOf()
+        squaresOnWhiteAttack = arrayListOf()
+        squaresOnBlackAttack = arrayListOf()
     }
 
     constructor(position: String) : this() {
         createBoardWithPosition(position)
-        for (piece in whitePieces)
-            piece.setPosition(piece.getPosition())
-        for (piece in blackPieces)
-            piece.setPosition(piece.getPosition())
+        getCurrentMoves()
+        calculateSquaresOnAttack()
+    }
+
+    private fun getCurrentMoves() {
+        for (piece in whitePieces) {
+            piece.updateMoves()
+        }
+        for (piece in blackPieces) {
+            piece.updateMoves()
+        }
     }
 
     private fun createBoardWithPosition(position: String) {
@@ -72,7 +84,7 @@ class ChessBoard() {
         }
     }
 
-    fun getSquare(file: Char, rank: Int): Square {   // takes as input file and rank counting from 1
+    fun getSquare(file: Char, rank: Int): Square {   // takes as input file 'a'..'h' and rank 1..8
         val fileIndex = file.uppercaseChar().code - 65
         val arrayRank = SIZE - rank
         return this.board[arrayRank][fileIndex]
@@ -103,6 +115,31 @@ class ChessBoard() {
         }
     }
 
+    private fun calculateSquaresOnAttack() {
+        squaresOnWhiteAttack.clear()
+        squaresOnBlackAttack.clear()
+        for (piece in whitePieces) {
+            for (square in piece.squaresUnderAttack) {
+                if (!squaresOnWhiteAttack.contains(square))
+                    squaresOnWhiteAttack.add(square)
+            }
+        }
+        for (piece in blackPieces) {
+            for (square in piece.squaresUnderAttack) {
+                if (!squaresOnBlackAttack.contains(square))
+                    squaresOnBlackAttack.add(square)
+            }
+        }
+    }
+
+    fun getWhiteAttacks(): ArrayList<Square> {
+        return this.squaresOnWhiteAttack
+    }
+
+    fun getBlackAttacks(): ArrayList<Square> {
+        return this.squaresOnBlackAttack
+    }
+
     fun printBoard() {
         for (i in 0 until SIZE) {
             print("${SIZE - i} | ")
@@ -115,4 +152,20 @@ class ChessBoard() {
         println("    a  b  c  d  e  f  g  h")
     }
 
+}
+
+fun main() {
+    val board = ChessBoard(DEFAULT_POSITION)
+    val whiteAttack = arrayListOf<Pair<Char, Int>>()
+    val blackAttack = arrayListOf<Pair<Char, Int>>()
+
+    for (square in board.getWhiteAttacks()) {
+        whiteAttack.add(Pair(square.getFile(), square.getRank()))
+    }
+    for (square in board.getBlackAttacks()) {
+        blackAttack.add(Pair(square.getFile(), square.getRank()))
+    }
+    println("Squares that white pieces attack: $whiteAttack")
+    println("Squares that black pieces attack: $blackAttack")
+    board.printBoard()
 }

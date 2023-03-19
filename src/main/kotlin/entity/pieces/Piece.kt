@@ -7,7 +7,8 @@ interface Piece {
     var inGame: Boolean
     var square: Square
     val color: Color
-    var possibleMoves: ArrayList<Square>
+    val possibleMoves: ArrayList<Square>
+    val squaresUnderAttack: ArrayList<Square>
 
     fun setPosition(value: Square) {
         this.square = value
@@ -16,4 +17,6 @@ interface Piece {
     fun getPosition(): Square {
         return this.square
     }
+
+    fun updateMoves()
 }
