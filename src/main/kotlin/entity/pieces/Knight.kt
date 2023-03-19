@@ -1,5 +1,6 @@
 package entity.pieces
 
+import entity.board.ChessBoard
 import entity.board.Square
 import entity.helper.Color
 
@@ -21,8 +22,8 @@ class Knight(
 
     private fun updatePossibleMoves() {
         possibleMoves = arrayListOf()
-        val pairs = calculateKnightPossibleMoves(square.getFile(), square.getRank())
         val board = square.getBoard()
+        val pairs = calculateKnightPossibleMoves(square.getFile(), square.getRank(), color, board)
         for (pair in pairs) {
             possibleMoves.add(board.getSquare(pair.first, pair.second))
         }
@@ -37,10 +38,10 @@ class Knight(
     }
 }
 
-private fun calculateKnightPossibleMoves(file: Char, rank: Int): List<Pair<Char, Int>> {
-    val visibleSquares = mutableListOf<Pair<Char, Int>>()
+private fun calculateKnightPossibleMoves(file: Char, rank: Int, color: Color, board: ChessBoard): List<Pair<Char, Int>> {
+    val possibleMoves = mutableListOf<Pair<Char, Int>>()
 
-    val movements = arrayOf(
+    val movements = listOf(
         Pair(2, 1),
         Pair(2, -1),
         Pair(-2, 1),
@@ -51,21 +52,21 @@ private fun calculateKnightPossibleMoves(file: Char, rank: Int): List<Pair<Char,
         Pair(-1, -2)
     )
 
-    val fileIndex = file.uppercaseChar().code - 65
-
     for (movement in movements) {
-        val newFile = fileIndex + movement.first
+        val newFile = file + movement.first
         val newRank = rank + movement.second
 
-        // Check if move is within the board boundaries
-        if (newFile in 0..7 && newRank in 1..8) {
-            visibleSquares.add(Pair((newFile + 65).toChar(), newRank))
+        // Check if move is within the board boundaries and there are no same color pieces
+        if (newFile in 'a'..'h' && newRank in 1..8 && board.getSquare(newFile, newRank).getPiece()?.color != color) {
+            possibleMoves.add(Pair(newFile, newRank))
         }
     }
 
-    return visibleSquares
+    return possibleMoves
 }
 
 fun main() {
-    println("${calculateKnightPossibleMoves('d', 5)}")
+    val chessBoard = ChessBoard("rnbqkbnr/pppppppp/8/8/2QB4/8/PPPPPPPP/RNBQKBNR")
+    println("${calculateKnightPossibleMoves('e', 5, Color.WHITE, chessBoard)}")
+    chessBoard.printBoard()
 }

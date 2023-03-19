@@ -1,5 +1,6 @@
 package entity.pieces
 
+import entity.board.ChessBoard
 import entity.board.Square
 import entity.helper.Color
 
@@ -19,8 +20,8 @@ class Queen(override val color: Color) : Piece {
 
     private fun updatePossibleMoves() {
         possibleMoves = arrayListOf()
-        val pairs = calculateQueenPossibleMoves(square.getFile(), square.getRank())
         val board = square.getBoard()
+        val pairs = calculateQueenPossibleMoves(square.getFile(), square.getRank(), color, board)
         for (pair in pairs) {
             possibleMoves.add(board.getSquare(pair.first, pair.second))
         }
@@ -35,15 +36,17 @@ class Queen(override val color: Color) : Piece {
     }
 }
 
-private fun calculateQueenPossibleMoves(file: Char, rank: Int): List<Pair<Char, Int>> {
+private fun calculateQueenPossibleMoves(file: Char, rank: Int, color: Color, board: ChessBoard): List<Pair<Char, Int>> {
     val visibleSquares = mutableListOf<Pair<Char, Int>>()
 
-    visibleSquares.addAll(calculateRookPossibleMoves(file, rank))
-//    visibleSquares.addAll(calculateBishopPossibleMoves(file, rank))
+    visibleSquares.addAll(calculateRookPossibleMoves(file, rank, color, board))
+    visibleSquares.addAll(calculateBishopPossibleMoves(file, rank, color, board))
 
     return visibleSquares
 }
 
 fun main() {
-    println("${calculateQueenPossibleMoves('g', 4)}")
+    val chessBoard = ChessBoard("rnbqkbnr/pppppppp/8/8/2Qb4/8/PPPPPPPP/RNBQKBNR")
+    println("${calculateQueenPossibleMoves('d', 5, Color.WHITE, chessBoard)}")
+    chessBoard.printBoard()
 }

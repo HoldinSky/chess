@@ -21,7 +21,7 @@ class Bishop(override val color: Color) : Piece {
     private fun updatePossibleMoves() {
         possibleMoves = arrayListOf()
         val board = square.getBoard()
-        val pairs = calculateBishopPossibleMoves(square.getFile(), square.getRank(), board, color)
+        val pairs = calculateBishopPossibleMoves(square.getFile(), square.getRank(), color,  board)
         for (pair in pairs) {
             possibleMoves.add(board.getSquare(pair.first, pair.second))
         }
@@ -36,7 +36,7 @@ class Bishop(override val color: Color) : Piece {
     }
 }
 
-internal fun calculateBishopPossibleMoves(file: Char, rank: Int, board: ChessBoard, color: Color): List<Pair<Char, Int>> {
+internal fun calculateBishopPossibleMoves(file: Char, rank: Int, color: Color,  board: ChessBoard): List<Pair<Char, Int>> {
     val possibleMoves = mutableListOf<Pair<Char, Int>>()
     val oppositeColor = if (color == Color.WHITE)
         Color.BLACK
@@ -44,43 +44,19 @@ internal fun calculateBishopPossibleMoves(file: Char, rank: Int, board: ChessBoa
         Color.WHITE
 
     // beam to low left corner
-    possibleMoves.addAll(checkVisibleLines(file - 1, rank - 1, -1, -1, board, color, oppositeColor))
+    possibleMoves.addAll(checkDirection(file, rank, -1, -1, color, oppositeColor, board))
     // to high left corner
-    possibleMoves.addAll(checkVisibleLines(file - 1, rank + 1, -1, 1, board, color, oppositeColor))
+    possibleMoves.addAll(checkDirection(file, rank, -1, 1, color, oppositeColor, board))
     // to high right corner
-    possibleMoves.addAll(checkVisibleLines(file + 1, rank + 1, 1, 1, board, color, oppositeColor))
+    possibleMoves.addAll(checkDirection(file, rank, 1, 1, color, oppositeColor, board))
     // to low right corner
-    possibleMoves.addAll(checkVisibleLines(file + 1, rank - 1, 1, -1, board, color, oppositeColor))
+    possibleMoves.addAll(checkDirection(file, rank, 1, -1, color, oppositeColor, board))
 
     return possibleMoves
 }
 
-// function to add possible moves in one direction
-private fun checkVisibleLines(
-    file: Char, rank: Int, deltaFile: Int, deltaRank: Int,
-    board: ChessBoard, color: Color, oppositeColor: Color
-): List<Pair<Char, Int>> {
-    val list = mutableListOf<Pair<Char, Int>>()
-    var f = file
-    var r = rank
-
-    while (f in 'a'..'h' && r in 1..8) {
-        if (board.getSquare(f, r).getPiece()?.color == oppositeColor) {
-            list.add(Pair(f, r))
-            break
-        } else if (board.getSquare(f, r).getPiece()?.color == color) {
-            break
-        }
-        list.add(Pair(f, r))
-        f += deltaFile
-        r += deltaRank
-    }
-
-    return list
-}
-
 fun main() {
     val chessBoard = ChessBoard("rnbqkbnr/pppppppp/8/3n4/8/8/PPPPPPPP/RNBQKBNR")
-    println("${calculateBishopPossibleMoves('c', 4, chessBoard, Color.WHITE)}")
+    println("${calculateBishopPossibleMoves('c', 4, Color.WHITE, chessBoard)}")
     chessBoard.printBoard()
 }

@@ -1,5 +1,6 @@
 package entity.pieces
 
+import entity.board.ChessBoard
 import entity.board.Square
 import entity.helper.Color
 
@@ -19,8 +20,8 @@ class Rook(override val color: Color) : Piece {
 
     private fun updatePossibleMoves() {
         possibleMoves = arrayListOf()
-        val pairs = calculateRookPossibleMoves(square.getFile(), square.getRank())
         val board = square.getBoard()
+        val pairs = calculateRookPossibleMoves(square.getFile(), square.getRank(), color, board)
         for (pair in pairs) {
             possibleMoves.add(board.getSquare(pair.first, pair.second))
         }
@@ -35,36 +36,27 @@ class Rook(override val color: Color) : Piece {
     }
 }
 
-internal fun calculateRookPossibleMoves(file: Char, rank: Int): List<Pair<Char, Int>> {
-    val visibleSquares = mutableListOf<Pair<Char, Int>>()
+internal fun calculateRookPossibleMoves(file: Char, rank: Int, color: Color, board: ChessBoard): List<Pair<Char, Int>> {
+    val possibleMoves = mutableListOf<Pair<Char, Int>>()
+    val oppositeColor = if (color == Color.WHITE)
+        Color.BLACK
+    else
+        Color.WHITE
 
-    var newFile = file - 1
-    while (newFile in 'a'..'h') {
-        visibleSquares.add(Pair(newFile, rank))
-        --newFile
-    }
+    // beam to the left
+    possibleMoves.addAll(checkDirection(file, rank, -1, 0, color, oppositeColor, board))
+    // to the top
+    possibleMoves.addAll(checkDirection(file, rank, 0, 1, color, oppositeColor, board))
+    // to the right
+    possibleMoves.addAll(checkDirection(file, rank, 1, 0, color, oppositeColor, board))
+    // to the bottom
+    possibleMoves.addAll(checkDirection(file, rank, 0, -1, color, oppositeColor, board))
 
-    newFile = file + 1
-    while (newFile in 'a'..'h') {
-        visibleSquares.add(Pair(newFile, rank))
-        ++newFile
-    }
-
-    var newRank = rank - 1
-    while (newRank in 1..8) {
-        visibleSquares.add(Pair(file, newRank))
-        --newRank
-    }
-
-    newRank = rank + 1
-    while (newRank in 1..8) {
-        visibleSquares.add(Pair(file, newRank))
-        ++newRank
-    }
-
-    return visibleSquares
+    return possibleMoves
 }
 
 fun main() {
-    println("${calculateRookPossibleMoves('g', 4)}")
+    val chessBoard = ChessBoard("rnbqkbnr/pppppppp/8/8/2QB4/8/PPPPPPPP/RNBQKBNR")
+    println("${calculateRookPossibleMoves('e', 5, Color.BLACK, chessBoard)}")
+    chessBoard.printBoard()
 }
