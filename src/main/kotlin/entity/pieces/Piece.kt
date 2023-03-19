@@ -1,16 +1,22 @@
 package entity.pieces
 
-import entity.Square
+import entity.board.Square
 import entity.helper.Color
 
 interface Piece {
     var inGame: Boolean
     var square: Square
     val color: Color
-    var visibleSquares: ArrayList<Square>
-    var reachableSquares: ArrayList<Square>
+    val possibleMoves: ArrayList<Square>
+    val squaresUnderAttack: ArrayList<Square>
 
     fun setPosition(value: Square) {
         this.square = value
     }
+
+    fun getPosition(): Square {
+        return this.square
+    }
+
+    fun updateMoves()
 }

@@ -1,13 +1,16 @@
 package entity.pieces
 
-import entity.Square
+import entity.board.ChessBoard
+import entity.board.Square
 import entity.helper.Color
+import entity.helper.squaresToPairs
+import service.DEFAULT_POSITION
 
 class Rook(override val color: Color) : Piece {
     override var inGame: Boolean = true
     override lateinit var square: Square
-    override var visibleSquares: ArrayList<Square> = arrayListOf()
-    override var reachableSquares: ArrayList<Square> = arrayListOf()
+    override val possibleMoves: ArrayList<Square> = arrayListOf()
+    override val squaresUnderAttack: ArrayList<Square> = arrayListOf()
 
     constructor(color: Color, square: Square) : this(color) {
         this.square = square
@@ -15,16 +18,18 @@ class Rook(override val color: Color) : Piece {
 
     override fun setPosition(value: Square) {
         this.square = value
-        updateVisibleSquares()
     }
 
-    private fun updateVisibleSquares() {
-        visibleSquares = arrayListOf()
-        val pairs = calculateRookVisibleSquares(square.getFile(), square.getRank())
-        val board = square.getBoard()
-        for (pair in pairs) {
-            visibleSquares.add(board.getSquare(pair.first, pair.second))
-        }
+    override fun updateMoves() {
+        calculateRookPossibleMoves(square.getFile(), square.getRank(), color, square.getBoard())
+    }
+
+    private fun calculateRookPossibleMoves(file: Char, rank: Int, color: Color, board: ChessBoard) {
+        possibleMoves.clear()
+        squaresUnderAttack.clear()
+
+        calculateStraightMoves(file, rank, color, board, possibleMoves)
+        calculateStraightAttacks(file, rank, board, squaresUnderAttack)
     }
 
     override fun toString(): String {
@@ -36,36 +41,9 @@ class Rook(override val color: Color) : Piece {
     }
 }
 
-internal fun calculateRookVisibleSquares(file: Char, rank: Int): List<Pair<Char, Int>> {
-    val visibleSquares = mutableListOf<Pair<Char, Int>>()
-
-    var newFile = file - 1
-    while (newFile in 'a'..'h') {
-        visibleSquares.add(Pair(newFile, rank))
-        --newFile
-    }
-
-    newFile = file + 1
-    while (newFile in 'a'..'h') {
-        visibleSquares.add(Pair(newFile, rank))
-        ++newFile
-    }
-
-    var newRank = rank - 1
-    while (newRank in 1..8) {
-        visibleSquares.add(Pair(file, newRank))
-        --newRank
-    }
-
-    newRank = rank + 1
-    while (newRank in 1..8) {
-        visibleSquares.add(Pair(file, newRank))
-        ++newRank
-    }
-
-    return visibleSquares
-}
-
 fun main() {
-    println("${calculateRookVisibleSquares('g', 4)}")
+    val chessBoard = ChessBoard(DEFAULT_POSITION)
+    println("Possible moves of rook: ${squaresToPairs(chessBoard.getSquare('a', 1).getPiece()!!.possibleMoves)}")
+    println("Squares under attack of rook: ${squaresToPairs(chessBoard.getSquare('a', 1).getPiece()!!.squaresUnderAttack)}")
+    chessBoard.printBoard()
 }

@@ -1,4 +1,4 @@
-package entity
+package entity.board
 
 import entity.pieces.Piece
 
@@ -35,6 +35,10 @@ class Square(
 
     fun removePiece() {
         this.piece = null
+    }
+
+    fun isBlank(): Boolean {
+        return this.piece == null
     }
 
     override fun toString(): String {

@@ -1,13 +1,16 @@
 package entity.pieces
 
-import entity.Square
+import entity.board.ChessBoard
+import entity.board.Square
 import entity.helper.Color
+import entity.helper.squaresToPairs
+import service.DEFAULT_POSITION
 
 class Bishop(override val color: Color) : Piece {
     override lateinit var square: Square
     override var inGame: Boolean = true
-    override var visibleSquares: ArrayList<Square> = arrayListOf()
-    override var reachableSquares: ArrayList<Square> = arrayListOf()
+    override val possibleMoves: ArrayList<Square> = arrayListOf()
+    override val squaresUnderAttack: ArrayList<Square> = arrayListOf()
 
     constructor(color: Color, square: Square) : this(color) {
         this.square = square
@@ -15,16 +18,19 @@ class Bishop(override val color: Color) : Piece {
 
     override fun setPosition(value: Square) {
         this.square = value
-        updateVisibleSquares()
     }
 
-    private fun updateVisibleSquares() {
-        visibleSquares = arrayListOf()
-        val pairs = calculateBishopVisibleSquares(square.getFile(), square.getRank())
-        val board = square.getBoard()
-        for (pair in pairs) {
-            visibleSquares.add(board.getSquare(pair.first, pair.second))
-        }
+    override fun updateMoves() {
+        calculateBishopMoves(square.getFile(), square.getRank(), color, square.getBoard())
+    }
+
+    private fun calculateBishopMoves(file: Char, rank: Int, color: Color, board: ChessBoard) {
+
+        possibleMoves.clear()
+        squaresUnderAttack.clear()
+
+        calculateDiagonalMoves(file, rank, color, board, possibleMoves)
+        calculateDiagonalAttacks(file, rank, board, squaresUnderAttack)
     }
 
     override fun toString(): String {
@@ -36,48 +42,9 @@ class Bishop(override val color: Color) : Piece {
     }
 }
 
-internal fun calculateBishopVisibleSquares(file: Char, rank: Int): List<Pair<Char, Int>> {
-    val visibleSquares = mutableListOf<Pair<Char, Int>>()
-
-    // beam to low left corner
-    var newFile = file - 1
-    var newRank = rank - 1
-    while (newFile in 'a'..'h' && newRank in 1..8) {
-        visibleSquares.add(Pair(newFile, newRank))
-        --newFile
-        --newRank
-    }
-
-    // to high left corner
-    newFile = file - 1
-    newRank = rank + 1
-    while (newFile in 'a'..'h' && newRank in 1..8) {
-        visibleSquares.add(Pair(newFile, newRank))
-        --newFile
-        ++newRank
-    }
-
-    // to high right corner
-    newFile = file + 1
-    newRank = rank + 1
-    while (newFile in 'a'..'h' && newRank in 1..8) {
-        visibleSquares.add(Pair(newFile, newRank))
-        ++newFile
-        ++newRank
-    }
-
-    // to low right corner
-    newFile = file + 1
-    newRank = rank - 1
-    while (newFile in 'a'..'h' && newRank in 1..8) {
-        visibleSquares.add(Pair(newFile, newRank))
-        ++newFile
-        --newRank
-    }
-
-    return visibleSquares
-}
-
 fun main() {
-    println("${calculateBishopVisibleSquares('c', 2)}")
+    val chessBoard = ChessBoard(DEFAULT_POSITION)
+    println("Possible moves of bishop: ${squaresToPairs(chessBoard.getSquare('c', 1).getPiece()!!.possibleMoves)}")
+    println("Squares under attack of bishop: ${squaresToPairs(chessBoard.getSquare('c', 1).getPiece()!!.squaresUnderAttack)}")
+    chessBoard.printBoard()
 }

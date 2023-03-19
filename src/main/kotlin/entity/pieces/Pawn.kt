@@ -1,15 +1,18 @@
 package entity.pieces
 
-import entity.Square
+import entity.board.ChessBoard
+import entity.board.Square
 import entity.helper.Color
+import entity.helper.squaresToPairs
+import service.DEFAULT_POSITION
 
 class Pawn(
     override val color: Color
 ) : Piece {
     override lateinit var square: Square
     override var inGame: Boolean = true
-    override var visibleSquares: ArrayList<Square> = arrayListOf()
-    override var reachableSquares: ArrayList<Square> = arrayListOf()
+    override val possibleMoves: ArrayList<Square> = arrayListOf()
+    override val squaresUnderAttack: ArrayList<Square> = arrayListOf()
 
     constructor(color: Color, square: Square) : this(color) {
         this.square = square
@@ -17,16 +20,23 @@ class Pawn(
 
     override fun setPosition(value: Square) {
         this.square = value
-        updateVisibleSquares()
     }
 
-    private fun updateVisibleSquares() {
-        visibleSquares = arrayListOf()
-        val board = square.getBoard()
-        val pairs = calculatePawnVisibleSquares(square.getFile(), square.getRank(), color)
-        for (pair in pairs) {
-            visibleSquares.add(board.getSquare(pair.first, pair.second))
+    override fun updateMoves() {
+        calculatePawnPossibleMoves(square.getFile(), square.getRank(), color, square.getBoard())
+    }
+
+    private fun calculatePawnPossibleMoves(file: Char, rank: Int, color: Color, board: ChessBoard) {
+        possibleMoves.clear()
+        squaresUnderAttack.clear()
+
+        for (sq in calculatePawnDiagonals(file, rank, color, board)) {  // calculating diagonals
+            if (sq.getPiece()?.color != color)
+                possibleMoves.add(sq)
+            squaresUnderAttack.add(sq)
         }
+
+        possibleMoves.addAll(calculatePawnStraights(file, rank, color, board))
     }
 
     override fun toString(): String {
@@ -38,34 +48,68 @@ class Pawn(
     }
 }
 
-private fun calculatePawnVisibleSquares(file: Char, rank: Int, color: Color): List<Pair<Char, Int>> {
-    val visibleSquares = arrayListOf<Pair<Char, Int>>()
+private fun calculatePawnDiagonals(file: Char, rank: Int, color: Color, board: ChessBoard): List<Square> {
+    val list = mutableListOf<Square>()
 
     if (color == Color.WHITE) {
-        visibleSquares.add(Pair(file, rank + 1))    // one square up
-        if (rank == 2) {    // two squares up
-            visibleSquares.add(Pair(file, rank + 2))
+        if (file - 1 >= 'a')
+            list.add(board.getSquare(file - 1, rank + 1))
+        if (file + 1 <= 'h')
+            list.add(board.getSquare(file + 1, rank + 1))
+        return list
+    }
+    if (file - 1 >= 'a')
+        list.add(board.getSquare(file - 1, rank - 1))
+    if (file + 1 <= 'h')
+        list.add(board.getSquare(file + 1, rank - 1))
+    return list
+}
+
+private fun calculatePawnStraights(file: Char, rank: Int, color: Color, board: ChessBoard): List<Square> {
+    val list = mutableListOf<Square>()
+
+    var square: Square
+    if (color == Color.WHITE) {
+        square = board.getSquare(file, rank + 1)
+        if (square.isBlank())
+            list.add(square)
+        else
+            return list
+
+        if (rank == 2) {
+            square = board.getSquare(file, rank + 2)
+            if (square.isBlank())
+                list.add(square)
+            else
+                return list
         }
-        if (file - 1 in 'a'..'h')
-            visibleSquares.add(Pair(file - 1, rank + 1))
-        if (file + 1 in 'a'..'h')
-            visibleSquares.add(Pair(file + 1, rank + 1))
-        return visibleSquares
+        return list
     }
+    square = board.getSquare(file, rank - 1)
+    if (square.isBlank())
+        list.add(square)
+    else
+        return list
 
-    visibleSquares.add(Pair(file, rank - 1))    // one square down
-    if (rank == 7) {        // two squares down
-        visibleSquares.add(Pair(file, rank - 2))
+    if (rank == 7) {
+        square = board.getSquare(file, rank - 2)
+        if (square.isBlank())
+            list.add(square)
+        else
+            return list
     }
-    if (file - 1 in 'a'..'h')
-        visibleSquares.add(Pair(file - 1, rank - 1))
-    if (file + 1 in 'a'..'h')
-        visibleSquares.add(Pair(file + 1, rank - 1))
-
-
-    return visibleSquares
+    return list
 }
 
 fun main() {
-    println("${calculatePawnVisibleSquares('a', 6, Color.BLACK)}")
+    val chessBoard = ChessBoard("rnbqkbnr/pppppppp/8/8/2n1q3/3P4/PPPPPPPP/RNBQKBNR")
+    println("Possible moves of pawn: ${squaresToPairs(chessBoard.getSquare('d', 3).getPiece()!!.possibleMoves)}")
+    println(
+        "Squares under attack of pawn: ${
+            squaresToPairs(
+                chessBoard.getSquare('d', 3).getPiece()!!.squaresUnderAttack
+            )
+        }"
+    )
+    chessBoard.printBoard()
 }

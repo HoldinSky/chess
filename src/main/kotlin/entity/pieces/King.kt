@@ -1,13 +1,16 @@
 package entity.pieces
 
-import entity.Square
+import entity.board.ChessBoard
+import entity.board.Square
 import entity.helper.Color
+import entity.helper.squaresToPairs
+import service.DEFAULT_POSITION
 
 class King(override val color: Color) : Piece {
     override var inGame: Boolean = true
     override lateinit var square: Square
-    override var visibleSquares: ArrayList<Square> = arrayListOf()
-    override var reachableSquares: ArrayList<Square> = arrayListOf()
+    override val possibleMoves: ArrayList<Square> = arrayListOf()
+    override val squaresUnderAttack: ArrayList<Square> = arrayListOf()
 
     constructor(color: Color, square: Square) : this(color) {
         this.square = square
@@ -15,15 +18,38 @@ class King(override val color: Color) : Piece {
 
     override fun setPosition(value: Square) {
         this.square = value
-        updateVisibleSquares()
     }
 
-    private fun updateVisibleSquares() {
-        visibleSquares = arrayListOf()
-        val pairs = calculateKingVisibleSquares(square.getFile(), square.getRank())
-        val board = square.getBoard()
-        for (pair in pairs) {
-            visibleSquares.add(board.getSquare(pair.first, pair.second))
+    override fun updateMoves() {
+        calculateKingMoves(square.getFile(), square.getRank(), square.getBoard())
+    }
+
+    private fun calculateKingMoves(file: Char, rank: Int, board: ChessBoard) {
+        this.possibleMoves.clear()
+        this.squaresUnderAttack.clear()
+
+        val moves = arrayOf(
+            Pair(-1, -1),
+            Pair(-1, 0),
+            Pair(-1, +1),
+            Pair(0, +1),
+            Pair(+1, +1),
+            Pair(+1, 0),
+            Pair(+1, -1),
+            Pair(0, -1),
+        )
+
+        for (pair in moves) {
+            val newFile = file + pair.first
+            val newRank = rank + pair.second
+
+            if (newFile in 'a'..'h' && newRank in 1..8) {
+                val square = board.getSquare(newFile, newRank)
+                if (square.isBlank() || (!square.isBlank() && square.getPiece()!!.color != color)) {
+                    this.possibleMoves.add(square)
+                    this.squaresUnderAttack.add(square)
+                }
+            }
         }
     }
 
@@ -36,32 +62,9 @@ class King(override val color: Color) : Piece {
     }
 }
 
-private fun calculateKingVisibleSquares(file: Char, rank: Int): List<Pair<Char, Int>> {
-    val visibleSquares = mutableListOf<Pair<Char, Int>>()
-
-    val moves = arrayOf(
-        Pair(-1, -1),
-        Pair(-1, 0),
-        Pair(-1, +1),
-        Pair(0, +1),
-        Pair(+1, +1),
-        Pair(+1, 0),
-        Pair(+1, -1),
-        Pair(0, -1),
-    )
-
-    for (pair in moves) {
-        val newFile = file + pair.first
-        val newRank = rank + pair.second
-
-        if (newFile in 'a'..'h' && newRank in 1..8) {
-            visibleSquares.add(Pair(newFile, newRank))
-        }
-    }
-
-    return visibleSquares
-}
-
 fun main() {
-    println("${calculateKingVisibleSquares('e', 2)}")
+    val chessBoard = ChessBoard(DEFAULT_POSITION)
+    println("Possible moves of king: ${squaresToPairs(chessBoard.getSquare('e', 1).getPiece()!!.possibleMoves)}")
+    println("Squares under attack of king: ${squaresToPairs(chessBoard.getSquare('e', 1).getPiece()!!.squaresUnderAttack)}")
+    chessBoard.printBoard()
 }

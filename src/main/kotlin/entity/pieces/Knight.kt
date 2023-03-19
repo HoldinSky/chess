@@ -1,15 +1,18 @@
 package entity.pieces
 
-import entity.Square
+import entity.board.ChessBoard
+import entity.board.Square
 import entity.helper.Color
+import entity.helper.squaresToPairs
+import service.DEFAULT_POSITION
 
 class Knight(
     override val color: Color
 ) : Piece {
     override lateinit var square: Square
     override var inGame: Boolean = true
-    override var visibleSquares: ArrayList<Square> = arrayListOf()
-    override var reachableSquares: ArrayList<Square> = arrayListOf()
+    override val possibleMoves: ArrayList<Square> = arrayListOf()
+    override val squaresUnderAttack: ArrayList<Square> = arrayListOf()
 
     constructor(color: Color, square: Square) : this(color) {
         this.square = square
@@ -17,15 +20,38 @@ class Knight(
 
     override fun setPosition(value: Square) {
         this.square = value
-        updateVisibleSquares()
     }
 
-    private fun updateVisibleSquares() {
-        visibleSquares = arrayListOf()
-        val pairs = calculateKnightVisibleSquares(square.getFile(), square.getRank())
-        val board = square.getBoard()
-        for (pair in pairs) {
-            visibleSquares.add(board.getSquare(pair.first, pair.second))
+    override fun updateMoves() {
+        calculateKnightPossibleMoves(square.getFile(), square.getRank(), color, square.getBoard())
+    }
+
+    private fun calculateKnightPossibleMoves(file: Char, rank: Int, color: Color, board: ChessBoard) {
+        possibleMoves.clear()
+        squaresUnderAttack.clear()
+
+        val movements = listOf(
+            Pair(2, 1),
+            Pair(2, -1),
+            Pair(-2, 1),
+            Pair(-2, -1),
+            Pair(1, 2),
+            Pair(1, -2),
+            Pair(-1, 2),
+            Pair(-1, -2)
+        )
+
+        for (movement in movements) {
+            val newFile = file + movement.first
+            val newRank = rank + movement.second
+
+            // Check if move is within the board boundaries and there are no same color pieces
+            if (newFile in 'a'..'h' && newRank in 1..8) {
+                val square = board.getSquare(newFile, newRank)
+                if (square.getPiece()?.color != color)
+                    possibleMoves.add(square)
+                squaresUnderAttack.add(square)
+            }
         }
     }
 
@@ -38,35 +64,9 @@ class Knight(
     }
 }
 
-private fun calculateKnightVisibleSquares(file: Char, rank: Int): List<Pair<Char, Int>> {
-    val visibleSquares = mutableListOf<Pair<Char, Int>>()
-
-    val movements = arrayOf(
-        Pair(2, 1),
-        Pair(2, -1),
-        Pair(-2, 1),
-        Pair(-2, -1),
-        Pair(1, 2),
-        Pair(1, -2),
-        Pair(-1, 2),
-        Pair(-1, -2)
-    )
-
-    val fileIndex = file.uppercaseChar().code - 65
-
-    for (movement in movements) {
-        val newFile = fileIndex + movement.first
-        val newRank = rank + movement.second
-
-        // Check if move is within the board boundaries
-        if (newFile in 0..7 && newRank in 1..8) {
-            visibleSquares.add(Pair((newFile + 65).toChar(), newRank))
-        }
-    }
-
-    return visibleSquares
-}
-
 fun main() {
-    println("${calculateKnightVisibleSquares('d', 5)}")
+    val chessBoard = ChessBoard(DEFAULT_POSITION)
+    println("Possible moves of knight: ${squaresToPairs(chessBoard.getSquare('b', 1).getPiece()!!.possibleMoves)}")
+    println("Squares under attack of knight: ${squaresToPairs(chessBoard.getSquare('b', 1).getPiece()!!.squaresUnderAttack)}")
+    chessBoard.printBoard()
 }
